@@ -1,0 +1,147 @@
+:root {
+  --accent: #2563eb;
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --border: #e2e4e9;
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; background: var(--bg); color: var(--text); }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+}
+button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: 0.6; cursor: default; }
+
+input, textarea {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 100%;
+}
+
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-weight: 700; font-size: 18px; color: var(--accent); }
+.step-nav { display: flex; gap: 8px; }
+
+.app-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) 1fr;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.left-pane, .right-pane { min-width: 0; }
+
+.form-section, .template-selector {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.form-section h2, .template-selector h2 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; margin-bottom: 10px; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.entry-card { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
+.link-btn { border: none; background: none; color: var(--accent); padding: 4px 0; }
+
+.photo-uploader { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.photo-circle { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+.photo-placeholder {
+  background: #eef2ff;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+.hint { font-size: 11px; color: var(--text-muted); margin: 4px 0 0; }
+.error-text { font-size: 12px; color: #dc2626; margin: 4px 0 0; }
+
+.skill-form { display: flex; gap: 8px; margin-bottom: 12px; }
+.skill-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.skill-tag {
+  background: #eef2ff;
+  color: var(--accent);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.skill-tag button { border: none; background: none; padding: 0; color: inherit; font-size: 14px; }
+
+.template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.template-option { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 12px; }
+.template-option small { color: var(--text-muted); font-size: 11px; }
+.theme-row { display: flex; gap: 10px; }
+.theme-swatch { width: 32px; height: 32px; border-radius: 50%; padding: 0; border: 2px solid transparent; }
+.theme-swatch.active { border-color: var(--text); }
+
+.preview-panel { position: sticky; top: 24px; }
+.preview-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.preview-toolbar h2 { font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 0; }
+.preview-page {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  aspect-ratio: 1 / 1.414;
+  overflow: auto;
+  padding: 28px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 900px) {
+  .app-main { grid-template-columns: 1fr; }
+  .preview-panel { position: static; }
+}
+
+@media print {
+  body * { visibility: hidden; }
+  #preview-print-area, #preview-print-area * { visibility: visible; }
+  #preview-print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+}

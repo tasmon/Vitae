@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vitae — Resume Builder</title>
+    <meta name="description" content="Build a polished resume in minutes, entirely on your device." />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+
+    <!--
+      Zero-build dependency resolution: modern browsers support native
+      ES module imports. This import map lets every file below write a
+      plain "import React from 'react'" — the browser resolves that bare
+      name to the CDN URL on the right instead of needing a bundler to
+      rewrite it. ?external=react tells esm.sh not to bundle its own
+      private copy of React inside react-dom/zustand, and to instead
+      resolve their internal "import ... from 'react'" through THIS same
+      map — otherwise you'd end up with two separate React copies loaded
+      at once, which breaks hooks in confusing ways.
+    -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.3.1",
+        "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?external=react",
+        "zustand": "https://esm.sh/zustand@4.5.2?external=react",
+        "zustand/middleware": "https://esm.sh/zustand@4.5.2/middleware?external=react",
+        "zod": "https://esm.sh/zod@3.23.8"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
