@@ -103,6 +103,77 @@ function EducationForm() {
   );
 }
 
+function CoCurricularForm() {
+  const items = useResumeStore((s) => s.resume.coCurricular);
+  const addItem = useResumeStore((s) => s.addCoCurricular);
+  const updateItem = useResumeStore((s) => s.updateCoCurricular);
+  const removeItem = useResumeStore((s) => s.removeCoCurricular);
+
+  return h(
+    'section',
+    { className: 'form-section' },
+    h('h2', null, 'Co-curricular activities'),
+    ...items.map((c) =>
+      h(
+        'div',
+        { key: c.id, className: 'entry-card' },
+        h(
+          'div',
+          { className: 'field-grid' },
+          h(Field, { label: 'Activity', value: c.title, onChange: (ev) => updateItem(c.id, 'title', ev.target.value) }),
+          h(Field, { label: 'Your role', value: c.role, onChange: (ev) => updateItem(c.id, 'role', ev.target.value) }),
+          h(Field, { label: 'Years', value: c.years, onChange: (ev) => updateItem(c.id, 'years', ev.target.value) })
+        ),
+        h(
+          'label',
+          { className: 'field' },
+          h('span', null, 'Description'),
+          h('textarea', { rows: 2, value: c.description, onChange: (ev) => updateItem(c.id, 'description', ev.target.value) })
+        ),
+        h('button', { type: 'button', className: 'link-btn', onClick: () => removeItem(c.id) }, 'Remove')
+      )
+    ),
+    h('button', { type: 'button', onClick: addItem }, '+ Add activity')
+  );
+}
+
+function AchievementsForm() {
+  const achievements = useResumeStore((s) => s.resume.achievements);
+  const addAchievement = useResumeStore((s) => s.addAchievement);
+  const removeAchievement = useResumeStore((s) => s.removeAchievement);
+  const [draft, setDraft] = useState('');
+
+  function submit(e) {
+    e.preventDefault();
+    addAchievement(draft);
+    setDraft('');
+  }
+
+  return h(
+    'section',
+    { className: 'form-section' },
+    h('h2', null, 'Achievements'),
+    h(
+      'form',
+      { onSubmit: submit, className: 'skill-form' },
+      h('input', { value: draft, onChange: (e) => setDraft(e.target.value), placeholder: 'e.g. Winner, national coding hackathon 2024' }),
+      h('button', { type: 'submit' }, 'Add')
+    ),
+    h(
+      'div',
+      { className: 'skill-tags' },
+      ...achievements.map((a, i) =>
+        h(
+          'span',
+          { key: i, className: 'skill-tag' },
+          a,
+          h('button', { type: 'button', onClick: () => removeAchievement(i), 'aria-label': `Remove ${a}` }, '×')
+        )
+      )
+    )
+  );
+}
+
 function SkillsForm() {
   const skills = useResumeStore((s) => s.resume.skills);
   const addSkill = useResumeStore((s) => s.addSkill);
@@ -140,6 +211,87 @@ function SkillsForm() {
   );
 }
 
+function LanguagesForm() {
+  const languages = useResumeStore((s) => s.resume.languages);
+  const addLanguage = useResumeStore((s) => s.addLanguage);
+  const updateLanguage = useResumeStore((s) => s.updateLanguage);
+  const removeLanguage = useResumeStore((s) => s.removeLanguage);
+
+  return h(
+    'section',
+    { className: 'form-section' },
+    h('h2', null, 'Languages'),
+    ...languages.map((l) =>
+      h(
+        'div',
+        { key: l.id, className: 'entry-card' },
+        h(
+          'div',
+          { className: 'field-grid' },
+          h(Field, { label: 'Language', value: l.name, onChange: (ev) => updateLanguage(l.id, 'name', ev.target.value) }),
+          h(Field, {
+            label: 'Level',
+            value: l.level,
+            placeholder: 'e.g. Fluent, Intermediate',
+            onChange: (ev) => updateLanguage(l.id, 'level', ev.target.value),
+          })
+        ),
+        h('button', { type: 'button', className: 'link-btn', onClick: () => removeLanguage(l.id) }, 'Remove')
+      )
+    ),
+    h('button', { type: 'button', onClick: addLanguage }, '+ Add language')
+  );
+}
+
+function ReferencesForm() {
+  const references = useResumeStore((s) => s.resume.references);
+  const addReference = useResumeStore((s) => s.addReference);
+  const updateReference = useResumeStore((s) => s.updateReference);
+  const removeReference = useResumeStore((s) => s.removeReference);
+
+  return h(
+    'section',
+    { className: 'form-section' },
+    h('h2', null, 'References'),
+    ...references.map((r) =>
+      h(
+        'div',
+        { key: r.id, className: 'entry-card' },
+        h(
+          'div',
+          { className: 'field-grid' },
+          h(Field, { label: 'Name', value: r.name, onChange: (ev) => updateReference(r.id, 'name', ev.target.value) }),
+          h(Field, {
+            label: 'Relation',
+            value: r.relation,
+            placeholder: 'e.g. Former manager',
+            onChange: (ev) => updateReference(r.id, 'relation', ev.target.value),
+          }),
+          h(Field, {
+            label: 'Contact',
+            value: r.contact,
+            placeholder: 'Email or phone',
+            onChange: (ev) => updateReference(r.id, 'contact', ev.target.value),
+          })
+        ),
+        h('button', { type: 'button', className: 'link-btn', onClick: () => removeReference(r.id) }, 'Remove')
+      )
+    ),
+    h('button', { type: 'button', onClick: addReference }, '+ Add reference')
+  );
+}
+
 export function FormPanel() {
-  return h('div', { className: 'form-panel' }, h(PersonalForm), h(ExperienceForm), h(EducationForm), h(SkillsForm));
+  return h(
+    'div',
+    { className: 'form-panel' },
+    h(PersonalForm),
+    h(ExperienceForm),
+    h(EducationForm),
+    h(CoCurricularForm),
+    h(AchievementsForm),
+    h(SkillsForm),
+    h(LanguagesForm),
+    h(ReferencesForm)
+  );
 }

@@ -1,108 +1,132 @@
 # Vitae — Resume Builder (zero-build)
 
-A local-first resume builder: fill in your details, switch between
-templates and accent themes with an instant live preview, export to PDF
-via the browser's print dialog. All data — including your photo — stays
-on your device in `localStorage`; nothing is uploaded anywhere.
+A local-first resume builder: fill in your details across eight sections,
+switch between 15 templates, 8 accent colors, and 6 font pairings with an
+instant live preview, then export to PDF (print) or a Word document. All
+data — including your photo — stays on your device in `localStorage`;
+nothing is uploaded anywhere.
 
-**This version has no build step.** There is no `package.json`, no `npm
-install`, no bundler. Every file here is exactly what runs in the browser.
-Upload the whole folder to any static host and it works.
+**No build step.** No `package.json`, no bundler. Every file here is
+exactly what runs in the browser. Upload the whole folder to any static
+host and it works.
 
 ## How to run it
 
-**Deploy it (recommended):** upload every file in this folder — flat, no
-subfolder — to any static host: GitHub Pages, Netlify (drag-and-drop the
-folder onto their deploy page), Vercel, S3, nginx, your own server. Nothing
-to configure. Open the site and it works.
+**Deploy it:** upload every file in this folder — flat, no subfolder — to
+any static host: GitHub Pages, Netlify (drag-and-drop the folder onto
+their deploy page), Vercel, S3, nginx, your own server. Nothing to
+configure.
 
-**Preview it locally:** browsers block ES-module imports over `file://`
-for security reasons (this is true of any zero-build ES-module app, not
-specific to this one), so double-clicking `index.html` directly won't
-load the app. Serve the folder instead — one command, no install needed:
+**Preview it locally:** browsers block ES-module imports over `file://`,
+so double-clicking `index.html` won't load the app. Serve the folder
+instead:
 
 ```bash
 python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
-(Or `npx serve .`, or the VS Code "Live Server" extension — anything that
-serves static files over `http://` works.)
+## What's in it
+
+### Sections (data entry)
+Personal info + photo, Experience, Education, Co-Curricular Activities,
+Achievements, Skills, Languages, References. Each is an independent form
+component in `formPanel.js` that only ever writes to the store — none of
+them know templates exist.
+
+### 15 templates, built from 6 shared layout engines
+Rather than 15 separate hand-built component trees, `templates.js` has:
+
+- **Shared section renderers** (`ExperienceList`, `SkillsBlock`,
+  `LanguagesList`, etc.) — each supports a couple of style variants
+  (e.g. skills as tags, a comma-separated line, or decorative bars).
+- **Six layout engines** — `SingleColumnLayout`, `SidebarLayout`,
+  `BannerLayout`, `SplitLayout`, `TwoColumnBodyLayout` — that assemble
+  those renderers into a page.
+- **15 template specs** — plain data objects (`{ id, name, atsSafe, kind,
+  sectionTitleStyle, skillStyle, order, ... }`) that pick a layout engine
+  and a combination of style variants.
+
+Adding template #16 means adding one spec object, not writing a new
+component tree. The 15: Classic, Minimalist, Executive, Elegant Serif,
+Bold Header, Card Sections, Modern Grid, Timeline, Banner, Two-Tone,
+Sidebar, Sidebar Right, Compact, Compact Dense, Infographic Lite.
+
+### Colors and fonts, decoupled from templates
+`themes.js` holds 8 accent colors; `fonts.js` holds 6 font pairings
+(loaded from Google Fonts in `index.html`). Neither knows which template
+is active — so 15 templates × 8 colors × 6 fonts multiply into hundreds
+of distinct-looking resumes without extra code.
+
+### Exports
+- **PDF** — `window.print()`, scoped to the preview page by the
+  `@media print` rule in `styles.css`. Uses whichever visual template is
+  selected.
+- **DOCX** — `exportDocx.js`, using the `docx` library (loaded via the
+  import map, generated fully client-side). This intentionally *ignores*
+  the visual template and always produces one clean, simply-formatted
+  document — the same reasoning that makes some templates "ATS-safe"
+  applies doubly to the Word export.
+
+### Dark mode
+`uiStore.js` is a separate, tiny store for app-shell theme only (not
+resume data), persisted to `localStorage` and applied via a
+`data-theme` attribute on `<html>`, set before first paint to avoid a
+flash of the wrong theme. Toggle is in the header. The resume preview
+page itself (`.preview-page` in `styles.css`) stays literal white
+regardless of the toggle — it's meant to be printed/exported, so it
+should look like paper, not follow your OS theme.
 
 ## How dependencies work without a build step
 
-`index.html` declares an **import map**:
+`index.html` declares an **import map** so every file can write plain
+`import React from 'react'`, `import { z } from 'zod'`, etc. — the
+browser resolves those bare names to CDN URLs (`esm.sh`), no bundler
+needed. `?external=react` on `react-dom` and `zustand` keeps everything
+resolving to a single shared copy of React (two copies loaded at once is
+the classic cause of "Invalid hook call" errors in setups like this).
 
-```html
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.3.1",
-    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?external=react",
-    "zustand": "https://esm.sh/zustand@4.5.2?external=react",
-    "zustand/middleware": "https://esm.sh/zustand@4.5.2/middleware?external=react",
-    "zod": "https://esm.sh/zod@3.23.8"
-  }
-}
-</script>
-```
-
-Every file below can write plain, ordinary `import React from 'react'` —
-the browser itself resolves `"react"` to that CDN URL, no bundler
-required. `esm.sh` serves real, browser-ready ES modules for npm packages.
-The `?external=react` flag on `react-dom` and `zustand` tells esm.sh not
-to bundle a private copy of React inside them, and instead resolve their
-own internal `import ... from 'react'` through this same import map — so
-there's only ever one copy of React loaded, which matters because two
-copies loaded side by side is the classic cause of "Invalid hook call"
-errors in setups like this.
+If the pinned `docx@8.5.0` build ever 404s on `esm.sh` (package versions
+do get superseded over time), drop the version pin in the import map —
+`"docx": "https://esm.sh/docx"` resolves to whatever's current.
 
 Requires a reasonably current browser (Chrome/Edge 89+, Firefox 108+,
-Safari 16.4+ — import maps landed a bit later in Safari). All evergreen
-browsers from the last ~2 years are fine.
+Safari 16.4+ for import maps).
 
 ## File map (flat, no subfolders)
 
 | File | Role |
 |---|---|
-| `index.html` | Import map + page shell. Loads `main.js` as an ES module. |
-| `schema.js` | Zod schema — single source of truth for what a "resume" is. |
-| `store.js` | Zustand store. Every mutation runs the resume through `resumeSchema.safeParse` and keeps any validation errors alongside the data. Persisted to `localStorage` automatically. |
-| `formPanel.js` | The modular data-entry system — `PersonalForm`, `ExperienceForm`, `EducationForm`, `SkillsForm` only ever write to the store; they know nothing about templates. |
-| `photoUploader.js` | File picker → `FileReader` → centered square crop on a `<canvas>` → resized/compressed JPEG data URL, stored in the resume object. Fully client-side. |
-| `templates.js` | The template engine. `templates` is a registry of `{ id, name, atsSafe, Component }`. Each `Component` is a pure function of `(resume, theme)` — reads the schema-shaped data, never writes to it. Ships Classic (ATS-safe), Sidebar, and Compact two-column. |
-| `themes.js` | Accent color + font-pairing tokens, applied independently of template choice, so template × theme combinations multiply instead of needing a new component per look. |
-| `templateSelector.js` | Step 2 UI: pick a template, pick an accent. |
-| `livePreview.js` | Renders the active template + theme against live store state; "Download / Print PDF" triggers `window.print()`, scoped by the `@media print` rule in `styles.css`. |
-| `app.js` | Two-step shell (Data entry → Template & theme) with the preview always visible alongside. |
-| `main.js` | Mounts the app; registers `sw.js`. |
-| `sw.js`, `manifest.webmanifest`, `icon.svg` | Minimal installable-PWA shell: offline app-shell caching (same-origin files only — CDN modules are left to the browser's normal HTTP cache) + manifest metadata. |
+| `index.html` | Import map, Google Fonts link, page shell. |
+| `schema.js` | Zod schema for all eight resume sections — single source of truth. |
+| `store.js` | Zustand store; every mutation re-validates via `resumeSchema.safeParse`; persisted to `localStorage`. |
+| `uiStore.js` | Separate store for dark/light mode only. |
+| `formPanel.js` | The eight data-entry section forms. |
+| `photoUploader.js` | Client-side crop-to-square + compress for the profile photo. |
+| `themes.js` | 8 accent colors. |
+| `fonts.js` | 6 font pairings. |
+| `templates.js` | The template engine: shared section renderers, 6 layout engines, 15 design specs. |
+| `templateSelector.js` | Step 2 UI: template grid, accent swatches, font list. |
+| `livePreview.js` | Renders the active template/theme/font; Print-PDF and Export-DOCX buttons. |
+| `exportDocx.js` | Generates a plain, ATS-friendly `.docx` client-side. |
+| `app.js` | App shell: step nav + dark-mode toggle. |
+| `main.js` | Mounts the app; sets initial theme attribute; registers `sw.js`. |
+| `sw.js`, `manifest.webmanifest`, `icon.svg` | Installable-PWA shell. |
 
-## Why there's no JSX
-
-JSX needs a compiler (Babel/TypeScript/etc.) to turn into real JavaScript
-— that's a build step. Every component here is written with
-`React.createElement` directly instead (aliased to `h` at the top of each
-file for brevity), which is exactly what JSX compiles down to anyway. It
-reads slightly more verbosely than JSX, but it's plain JavaScript the
-browser can run as-is.
-
-## The core architectural rule (unchanged from the build-based version)
+## The core rule (unchanged)
 
 **Forms only ever write to the schema-shaped resume object. Templates
-only ever read from it.** That's what lets you add template #10 without
-touching a form component, and add a new form field without breaking any
-existing template.
+only ever read from it.** New section? Add it to the schema, the store,
+one form component, and the `renderSection` switch in `templates.js` —
+every one of the 15 templates picks it up automatically wherever it
+appears in their `order`/`sidebarKeys`.
 
 ## Natural next steps
 
-- Move the photo from `localStorage` (as a base64 string) to IndexedDB as
-  a `Blob` once you need multiple resumes or larger photos — cheaper
-  storage, faster serialization.
-- Multi-resume support: add a `resumes: { [id]: Resume }` map to the
-  store plus a picker screen. Schema and templates don't need to change.
-- If you want a bundler back later purely for JSX ergonomics or offline
-  vendoring of React/Zustand/Zod (so the app works with zero network
-  calls at all), that's a separate, optional step — this version
-  intentionally trades a little verbosity for having no build tooling at
-  all.
+- Move the photo to IndexedDB as a `Blob` once you need multiple resumes
+  or larger photos.
+- Multi-resume support: a `resumes: { [id]: Resume }` map in the store
+  plus a picker screen — schema, templates, and the DOCX exporter don't
+  need to change.
+- A real ATS-content checker (bullet length, missing dates) independent
+  of which of the 15 templates is chosen.

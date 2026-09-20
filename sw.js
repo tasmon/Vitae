@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vitae-cache-v1';
+const CACHE_NAME = 'vitae-cache-v2';
 // Resolve app-shell URLs relative to wherever this worker is actually
 // served from, so this works at a domain root or under a subpath.
 const BASE = new URL('.', self.location).href;
@@ -11,13 +11,16 @@ const APP_SHELL = [
   `${BASE}main.js`,
   `${BASE}app.js`,
   `${BASE}store.js`,
+  `${BASE}uiStore.js`,
   `${BASE}schema.js`,
   `${BASE}themes.js`,
+  `${BASE}fonts.js`,
   `${BASE}templates.js`,
   `${BASE}formPanel.js`,
   `${BASE}photoUploader.js`,
   `${BASE}templateSelector.js`,
   `${BASE}livePreview.js`,
+  `${BASE}exportDocx.js`,
 ];
 
 self.addEventListener('install', (event) => {
